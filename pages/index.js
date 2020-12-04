@@ -1,65 +1,66 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { useState, useEffect } from "react";
+import PokemonCard from "../components/pokemonCard";
+import styles from "../styles/Home.module.css";
 
-export default function Home() {
+export async function getStaticProps(context) {
+  const pokemons = [];
+  const indexesArray = Array.from({ length: 3 }, (_, i) => i + 1);
+
+  const fetchPokemon = async (id) => {
+    const data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    return data;
+  };
+
+  indexesArray.map((i) => fetchPokemon(i).then((res) => res.json().then((data) => pokemons.push(data))));
+
+  const teste = await fetch(`https://pokeapi.co/api/v2/pokemon/150`).then((data) => data.json().then((pokemon) => pokemon));
+
+  return {
+    props: {
+      pokemonsStaticGeneration: pokemons,
+    },
+  };
+}
+
+export default function Home(props) {
+  const { pokemonsStaticGeneration } = props || {};
+  const [pokemons, setPokemons] = useState([]);
+
+  useEffect(() => {
+    const fetchPokemon = async (id) => {
+      const data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      return data;
+    };
+
+    const storePokemon = (pokemon) => {
+      setPokemons((oldPokemons) => [...oldPokemons, pokemon]);
+    };
+
+    const indexesArray = Array.from({ length: 3 }, (_, i) => i + 1);
+
+    indexesArray.map((i) =>
+      fetchPokemon(i).then((res) => {
+        res.json().then((data) => storePokemon(data));
+      })
+    );
+  }, []);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
+    <>
+      <div className={styles.container}>
+        <h1>Pokemon POC {props.name}</h1>
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          {pokemons.map((pokemon, i) => (
+            <PokemonCard key={i} {...pokemon} />
+          ))}
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+        <div className={styles.hr}></div>
+        <div className={styles.grid}>
+          {pokemonsStaticGeneration.map((pokemon, i) => (
+            <PokemonCard key={i} {...pokemon} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
 }
