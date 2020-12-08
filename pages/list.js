@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Head from "next/head";
 import Nav from "../components/Nav";
 import PokemonCard from "../components/PokemonCard";
 import styles from "../styles/Home.module.css";
@@ -48,6 +49,10 @@ export default function List(props) {
 
   return (
     <>
+      <Head>
+        <title>Principais pokemons: {pokemonsStaticGeneration.map((poke) => poke.name).join(" ")}</title>
+        <meta name="description" content={`Principais pokemons: ${pokemonsStaticGeneration.map((poke) => poke.name).join(" ")}`}></meta>
+      </Head>
       <Nav />
       <div className={styles.container}>
         <h1>Pokemon POC {props.name}</h1>
